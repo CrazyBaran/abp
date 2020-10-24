@@ -13,14 +13,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Localization;
 using Volo.Abp.ApiVersioning;
+using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Mvc.ApiExploring;
 using Volo.Abp.AspNetCore.Mvc.Conventions;
+using Volo.Abp.AspNetCore.Mvc.DataAnnotations;
 using Volo.Abp.AspNetCore.Mvc.DependencyInjection;
 using Volo.Abp.AspNetCore.Mvc.Json;
 using Volo.Abp.AspNetCore.Mvc.Localization;
@@ -28,6 +33,7 @@ using Volo.Abp.AspNetCore.VirtualFileSystem;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Http;
 using Volo.Abp.DynamicProxy;
+using Volo.Abp.GlobalFeatures;
 using Volo.Abp.Http.Modeling;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
@@ -40,7 +46,8 @@ namespace Volo.Abp.AspNetCore.Mvc
         typeof(AbpLocalizationModule),
         typeof(AbpApiVersioningAbstractionsModule),
         typeof(AbpAspNetCoreMvcContractsModule),
-        typeof(AbpUiModule)
+        typeof(AbpUiModule),
+        typeof(AbpGlobalFeaturesModule)
         )]
     public class AbpAspNetCoreMvcModule : AbpModule
     {
@@ -72,14 +79,14 @@ namespace Volo.Abp.AspNetCore.Mvc
                     (int) HttpStatusCode.NotImplemented,
                     (int) HttpStatusCode.InternalServerError
                 };
-                
+
                 options.SupportedResponseTypes.AddIfNotContains(statusCodes.Select(statusCode => new ApiResponseType
                 {
                     Type = typeof(RemoteServiceErrorResponse),
                     StatusCode = statusCode
                 }));
             });
-            
+
             context.Services.PostConfigure<AbpAspNetCoreMvcOptions>(options =>
             {
                 if (options.MinifyGeneratedScript == null)
@@ -88,10 +95,16 @@ namespace Volo.Abp.AspNetCore.Mvc
                 }
             });
 
-            var mvcCoreBuilder = context.Services.AddMvcCore();
+            var mvcCoreBuilder = context.Services.AddMvcCore(options =>
+            {
+                options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
+            });
             context.Services.ExecutePreConfiguredActions(mvcCoreBuilder);
-            
-            var abpMvcDataAnnotationsLocalizationOptions = context.Services.ExecutePreConfiguredActions(new AbpMvcDataAnnotationsLocalizationOptions());
+
+            var abpMvcDataAnnotationsLocalizationOptions = context.Services
+                .ExecutePreConfiguredActions(
+                    new AbpMvcDataAnnotationsLocalizationOptions()
+                );
 
             context.Services
                 .AddSingleton<IOptions<AbpMvcDataAnnotationsLocalizationOptions>>(
@@ -111,10 +124,19 @@ namespace Volo.Abp.AspNetCore.Mvc
                 {
                     options.DataAnnotationLocalizerProvider = (type, factory) =>
                     {
-                        var resourceType = abpMvcDataAnnotationsLocalizationOptions.AssemblyResources.GetOrDefault(type.Assembly);
-                        return factory.Create(resourceType ?? type);
+                        var resourceType = abpMvcDataAnnotationsLocalizationOptions
+                            .AssemblyResources
+                            .GetOrDefault(type.Assembly);
+
+                        if (resourceType != null)
+                        {
+                            return factory.Create(resourceType);
+                        }
+
+                        return factory.CreateDefaultOrNull() ??
+                               factory.Create(type);
                     };
-                })                
+                })
                 .AddViewLocalization(); //TODO: How to configure from the application? Also, consider to move to a UI module since APIs does not care about it.
 
             Configure<MvcRazorRuntimeCompilationOptions>(options =>
@@ -146,12 +168,33 @@ namespace Volo.Abp.AspNetCore.Mvc
             var application = context.Services.GetSingletonInstance<IAbpApplication>();
 
             partManager.FeatureProviders.Add(new AbpConventionalControllerFeatureProvider(application));
-            partManager.ApplicationParts.Add(new AssemblyPart(typeof(AbpAspNetCoreMvcModule).Assembly));
+            partManager.ApplicationParts.AddIfNotContains(typeof(AbpAspNetCoreMvcModule).Assembly);
+
+            context.Services.Replace(ServiceDescriptor.Singleton<IValidationAttributeAdapterProvider, AbpValidationAttributeAdapterProvider>());
+            context.Services.AddSingleton<ValidationAttributeAdapterProvider>();
 
             Configure<MvcOptions>(mvcOptions =>
             {
                 mvcOptions.AddAbp(context.Services);
             });
+
+            Configure<AbpEndpointRouterOptions>(options =>
+            {
+                options.EndpointConfigureActions.Add(endpointContext =>
+                {
+                    endpointContext.Endpoints.MapControllerRoute("defaultWithArea", "{area}/{controller=Home}/{action=Index}/{id?}");
+                    endpointContext.Endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                    endpointContext.Endpoints.MapRazorPages();
+                });
+            });
+        }
+
+        public override void PostConfigureServices(ServiceConfigurationContext context)
+        {
+            ApplicationPartSorter.Sort(
+                context.Services.GetSingletonInstance<ApplicationPartManager>(),
+                context.Services.GetSingletonInstance<IModuleContainer>()
+            );
         }
 
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
@@ -195,12 +238,7 @@ namespace Volo.Abp.AspNetCore.Mvc
         {
             foreach (var moduleAssembly in moduleAssemblies)
             {
-                if (partManager.ApplicationParts.OfType<AssemblyPart>().Any(p => p.Assembly == moduleAssembly))
-                {
-                    continue;
-                }
-
-                partManager.ApplicationParts.Add(new AssemblyPart(moduleAssembly));
+                partManager.ApplicationParts.AddIfNotContains(moduleAssembly);
             }
         }
     }

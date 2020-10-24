@@ -59,8 +59,9 @@ In most cases, you will want to change one or a few methods of the current imple
 ### Example: Overriding an Application Service
 
 ````csharp
+//[RemoteService(IsEnabled = false)] // If you use dynamic controller feature you can disable remote service. Prevent creating duplicate controller for the application service.
 [Dependency(ReplaceServices = true)]
-[ExposeServices(typeof(IIdentityUserAppService), typeof(IdentityUserAppService))]
+[ExposeServices(typeof(IIdentityUserAppService), typeof(IdentityUserAppService), typeof(MyIdentityUserAppService))]
 public class MyIdentityUserAppService : IdentityUserAppService
 {
     //...
@@ -106,30 +107,33 @@ You could completely **re-write** the entire business logic for a user creation 
 [ExposeServices(typeof(IdentityUserManager))]
 public class MyIdentityUserManager : IdentityUserManager
 {
-    public MyIdentityUserManager(
-        IdentityUserStore store, 
-        IOptions<IdentityOptions> optionsAccessor, 
-        IPasswordHasher<IdentityUser> passwordHasher,
-        IEnumerable<IUserValidator<IdentityUser>> userValidators, 
-        IEnumerable<IPasswordValidator<IdentityUser>> passwordValidators, 
-        ILookupNormalizer keyNormalizer, 
-        IdentityErrorDescriber errors, 
-        IServiceProvider services, 
-        ILogger<IdentityUserManager> logger, 
-        ICancellationTokenProvider cancellationTokenProvider
-        ) : base(
-            store, 
-            optionsAccessor, 
-            passwordHasher, 
-            userValidators, 
-            passwordValidators, 
-            keyNormalizer, 
-            errors, 
-            services, 
-            logger, 
-            cancellationTokenProvider)
-    {
-    }
+        public MyIdentityUserManager(
+            IdentityUserStore store,
+            IIdentityRoleRepository roleRepository, 
+            IIdentityUserRepository userRepository,
+            IOptions<IdentityOptions> optionsAccessor, 
+            IPasswordHasher<IdentityUser> passwordHasher,
+            IEnumerable<IUserValidator<IdentityUser>> userValidators, 
+            IEnumerable<IPasswordValidator<IdentityUser>> passwordValidators, 
+            ILookupNormalizer keyNormalizer,
+            IdentityErrorDescriber errors,
+            IServiceProvider services,
+            ILogger<IdentityUserManager> logger, 
+            ICancellationTokenProvider cancellationTokenProvider) : 
+            base(store,
+                roleRepository,
+                userRepository, 
+                optionsAccessor, 
+                passwordHasher, 
+                userValidators, 
+                passwordValidators,
+                keyNormalizer, 
+                errors, 
+                services, 
+                logger, 
+                cancellationTokenProvider)
+        {
+        }
 
     public override async Task<IdentityResult> CreateAsync(IdentityUser user)
     {
@@ -157,6 +161,41 @@ This example class inherits from the `IdentityUserManager` [domain service](Doma
 > `[ExposeServices(typeof(IdentityUserManager))]`  attribute is **required** here since `IdentityUserManager` does not define an interface (like `IIdentityUserManager`) and dependency injection system doesn't expose services for inherited classes (like it does for the implemented interfaces) by convention.
 
 Check the [localization system](Localization.md) to learn how to localize the error messages.
+
+### Example: Overriding a Controller
+
+````csharp
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Volo.Abp.Account;
+using Volo.Abp.DependencyInjection;
+
+namespace MyProject.Controllers
+{
+    [Dependency(ReplaceServices = true)]
+    [ExposeServices(typeof(AccountController))]
+    public class MyAccountController : AccountController
+    {
+        public MyAccountController(IAccountAppService accountAppService)
+            : base(accountAppService)
+        {
+
+        }
+
+        public override async Task SendPasswordResetCodeAsync(
+            SendPasswordResetCodeDto input)
+        {
+            Logger.LogInformation("Your custom logic...");
+
+            await base.SendPasswordResetCodeAsync(input);
+        }
+    }
+}
+````
+
+This example replaces the `AccountController` (An API Controller defined in the [Account Module](Modules/Account.md)) and overrides the `SendPasswordResetCodeAsync` method.
+
+**`[ExposeServices(typeof(AccountController))]` is essential** here since it registers this controller for the `AccountController` in the dependency injection system. `[Dependency(ReplaceServices = true)]` is also recommended to clear the old registration (even the ASP.NET Core DI system selects the last registered one).
 
 ### Overriding Other Classes
 

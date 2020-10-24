@@ -153,7 +153,7 @@ myGroup.AddPermission(
 myGroup.AddPermission("Author_Management", isEnabled: false);
 ````
 
-通常你不需要定义禁用权限(除非您暂时想要禁用应用程序的功能). 无论怎样,你可能想要禁用依赖模块中定义的权限,这样你可以禁用相关的功能. 参阅下面的 "*更改依赖模块的权限定义*" 节,查看示例用法.
+通常你不需要定义禁用权限(除非你暂时想要禁用应用程序的功能). 无论怎样,你可能想要禁用依赖模块中定义的权限,这样你可以禁用相关的功能. 参阅下面的 "*更改依赖模块的权限定义*" 节,查看示例用法.
 
 > 注意:检查一个未定义的权限会抛出异常,而被禁用的权限的返回禁止(false).
 
@@ -284,8 +284,6 @@ public async Task CreateAsync(CreateAuthorDto input)
 ````js
 abp.auth.isGranted('MyPermissionName');
 ````
-
-参阅 [abp.auth](AspNetCore/JavaScript-API/Auth.md) API 文档了解详情.
 
 ## 权限管理
 

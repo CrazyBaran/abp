@@ -2,7 +2,7 @@
 
 应用服务实现应用程序的**用例**, 将**领域层逻辑公开给表示层**.
 
-从表示层(可选)调用应用服务,**DTO (数据传对象)** 作为参数. 返回(可选)DTO给表示层.
+从表示层(可选)调用应用服务,**DTO ([数据传对象](Data-Transfer-Objects.md))** 作为参数. 返回(可选)DTO给表示层.
 
 ## 示例
 
@@ -380,4 +380,4 @@ public class DistrictKey
 
 ### 生命周期
 
-应用服务的生命周期是[transient](Dependency-Injection)的，它们会自动注册到依赖注入系统.
+应用服务的生命周期是[transient](Dependency-Injection)的,它们会自动注册到依赖注入系统.

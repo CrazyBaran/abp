@@ -1,11 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngxs/store';
-import {
-  AddRoute,
-  GetAppConfiguration,
-  PatchRouteByName,
-  SetEnvironment,
-} from '../actions/config.actions';
+import { GetAppConfiguration, SetEnvironment } from '../actions/config.actions';
 import { ConfigState } from '../states';
 
 @Injectable({
@@ -22,6 +17,10 @@ export class ConfigStateService {
     return this.store.selectSnapshot(ConfigState.getApplicationInfo);
   }
 
+  getEnvironment() {
+    return this.store.selectSnapshot(ConfigState.getEnvironment);
+  }
+
   getOne(...args: Parameters<typeof ConfigState.getOne>) {
     return this.store.selectSnapshot(ConfigState.getOne(...args));
   }
@@ -30,12 +29,12 @@ export class ConfigStateService {
     return this.store.selectSnapshot(ConfigState.getDeep(...args));
   }
 
-  getRoute(...args: Parameters<typeof ConfigState.getRoute>) {
-    return this.store.selectSnapshot(ConfigState.getRoute(...args));
-  }
-
   getApiUrl(...args: Parameters<typeof ConfigState.getApiUrl>) {
     return this.store.selectSnapshot(ConfigState.getApiUrl(...args));
+  }
+
+  getFeature(...args: Parameters<typeof ConfigState.getFeature>) {
+    return this.store.selectSnapshot(ConfigState.getFeature(...args));
   }
 
   getSetting(...args: Parameters<typeof ConfigState.getSetting>) {
@@ -54,16 +53,12 @@ export class ConfigStateService {
     return this.store.selectSnapshot(ConfigState.getLocalization(...args));
   }
 
+  getLocalizationResource(...args: Parameters<typeof ConfigState.getLocalizationResource>) {
+    return this.store.selectSnapshot(ConfigState.getLocalizationResource(...args));
+  }
+
   dispatchGetAppConfiguration() {
     return this.store.dispatch(new GetAppConfiguration());
-  }
-
-  dispatchPatchRouteByName(...args: ConstructorParameters<typeof PatchRouteByName>) {
-    return this.store.dispatch(new PatchRouteByName(...args));
-  }
-
-  dispatchAddRoute(...args: ConstructorParameters<typeof AddRoute>) {
-    return this.store.dispatch(new AddRoute(...args));
   }
 
   dispatchSetEnvironment(...args: ConstructorParameters<typeof SetEnvironment>) {
