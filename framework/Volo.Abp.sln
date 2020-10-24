@@ -353,7 +353,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.ExceptionHandling"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.AspNetCore.Components", "src\Volo.Abp.AspNetCore.Components\Volo.Abp.AspNetCore.Components.csproj", "{89840441-5A3A-4FD7-9CB4-E5B52FAEF72A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volo.Abp.Swashbuckle", "src\Volo.Abp.Swashbuckle\Volo.Abp.Swashbuckle.csproj", "{DD9519E0-5A68-48DC-A051-7BF2AC922F3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.Swashbuckle", "src\Volo.Abp.Swashbuckle\Volo.Abp.Swashbuckle.csproj", "{DD9519E0-5A68-48DC-A051-7BF2AC922F3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volo.Abp.EventBus.AzureServiceBus", "src\Volo.Abp.EventBus.AzureServiceBus\Volo.Abp.EventBus.AzureServiceBus.csproj", "{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volo.Abp.AzureServiceBus", "src\Volo.Abp.AzureServiceBus\Volo.Abp.AzureServiceBus.csproj", "{6D6205D0-4B89-4CAD-A1DD-20B453858D19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1057,6 +1061,14 @@ Global
 		{DD9519E0-5A68-48DC-A051-7BF2AC922F3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD9519E0-5A68-48DC-A051-7BF2AC922F3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD9519E0-5A68-48DC-A051-7BF2AC922F3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D6205D0-4B89-4CAD-A1DD-20B453858D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D6205D0-4B89-4CAD-A1DD-20B453858D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D6205D0-4B89-4CAD-A1DD-20B453858D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D6205D0-4B89-4CAD-A1DD-20B453858D19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1236,6 +1248,8 @@ Global
 		{B9D1ADCB-D552-4626-A1F1-78FF72C1E822} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
 		{89840441-5A3A-4FD7-9CB4-E5B52FAEF72A} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
 		{DD9519E0-5A68-48DC-A051-7BF2AC922F3E} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
+		{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
+		{6D6205D0-4B89-4CAD-A1DD-20B453858D19} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB97ECF4-9A84-433F-A80B-2A3285BDD1D5}

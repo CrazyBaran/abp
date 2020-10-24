@@ -13,7 +13,7 @@ using Volo.Abp.MultiTenancy;
 using Volo.Abp.RabbitMQ;
 using Volo.Abp.Threading;
 
-namespace Volo.Abp.EventBus.RabbitMq
+namespace Volo.Abp.EventBus.RabbitMq 
 {
     /* TODO: How to handle unsubscribe to unbind on RabbitMq (may not be possible for)
      * TODO: Implement Retry system
