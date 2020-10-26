@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.0.0" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Volo.Abp.Json\Volo.Abp.Json.csproj" />
     <ProjectReference Include="..\Volo.Abp.Threading\Volo.Abp.Threading.csproj" />
   </ItemGroup>
