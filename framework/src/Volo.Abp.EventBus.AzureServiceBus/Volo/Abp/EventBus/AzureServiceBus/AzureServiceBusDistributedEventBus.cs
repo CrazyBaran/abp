@@ -23,6 +23,9 @@ namespace Volo.Abp.EventBus.AzureServiceBus
         protected IAzureServiceBusSerializer Serializer { get; }
         protected ITopicClientPool TopicClientPool { get; }
 
+        protected ConcurrentDictionary<Type, List<IEventHandlerFactory>> HandlerFactories { get; }
+        protected ConcurrentDictionary<string, Type> EventTypes { get; }
+
         public AzureServiceBusDistributedEventBus(
             IOptions<AbpAzureServiceBusEventBusOptions> options,
             IAzureServiceBusSerializer serializer,
@@ -56,7 +59,34 @@ namespace Volo.Abp.EventBus.AzureServiceBus
 
         public override IDisposable Subscribe(Type eventType, IEventHandlerFactory factory)
         {
-            throw new NotImplementedException();
+            var handlerFactories = GetOrCreateHandlerFactories(eventType);
+
+            if (factory.IsInFactories(handlerFactories))
+            {
+                return NullDisposable.Instance;
+            }
+
+            handlerFactories.Add(factory);
+
+            if (handlerFactories.Count == 1) //TODO: Multi-threading!
+            {
+                //Rebus.Subscribe(eventType);
+            }
+
+            return new EventHandlerFactoryUnregistrar(this, eventType, factory);
+        }
+
+        private List<IEventHandlerFactory> GetOrCreateHandlerFactories(Type eventType)
+        {
+            return HandlerFactories.GetOrAdd(
+                eventType,
+                type =>
+                {
+                    var eventName = EventNameAttribute.GetNameOrDefault(type);
+                    EventTypes[eventName] = type;
+                    return new List<IEventHandlerFactory>();
+                }
+            );
         }
 
         public override void Unsubscribe<TEvent>(Func<TEvent, Task> action)
