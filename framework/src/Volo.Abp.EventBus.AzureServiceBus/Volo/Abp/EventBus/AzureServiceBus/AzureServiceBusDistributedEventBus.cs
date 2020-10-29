@@ -39,6 +39,28 @@ namespace Volo.Abp.EventBus.AzureServiceBus
             TopicClientPool = topicClientPool;
         }
 
+        public void Initialize()
+        {
+           // Consumer = MessageConsumerFactory.Create(
+           //     new ExchangeDeclareConfiguration(
+           //         AbpRabbitMqEventBusOptions.ExchangeName,
+           //         type: "direct",
+           //         durable: true
+           //     ),
+           //     new QueueDeclareConfiguration(
+           //         AbpRabbitMqEventBusOptions.ClientName,
+           //         durable: true,
+           //         exclusive: false,
+           //         autoDelete: false
+           //     ),
+           //     AbpRabbitMqEventBusOptions.ConnectionName
+           // );
+           //
+           // Consumer.OnMessageReceived(ProcessEventAsync);
+           //
+           // SubscribeHandlers(AbpDistributedEventBusOptions.Handlers);
+        }
+
         public override async Task PublishAsync(Type eventType, object eventData)
         {
             var eventName = EventNameAttribute.GetNameOrDefault(eventType);
@@ -91,27 +113,64 @@ namespace Volo.Abp.EventBus.AzureServiceBus
 
         public override void Unsubscribe<TEvent>(Func<TEvent, Task> action)
         {
-            throw new NotImplementedException();
+            Check.NotNull(action, nameof(action));
+
+            GetOrCreateHandlerFactories(typeof(TEvent))
+                .Locking(factories =>
+                {
+                    factories.RemoveAll(
+                        factory =>
+                        {
+                            var singleInstanceFactory = factory as SingleInstanceHandlerFactory;
+                            if (singleInstanceFactory == null)
+                            {
+                                return false;
+                            }
+
+                            var actionHandler = singleInstanceFactory.HandlerInstance as ActionEventHandler<TEvent>;
+                            if (actionHandler == null)
+                            {
+                                return false;
+                            }
+
+                            return actionHandler.Action == action;
+                        });
+                });
         }
 
         public override void Unsubscribe(Type eventType, IEventHandler handler)
         {
-            throw new NotImplementedException();
+            GetOrCreateHandlerFactories(eventType)
+                .Locking(factories =>
+                {
+                    factories.RemoveAll(
+                        factory =>
+                            factory is SingleInstanceHandlerFactory &&
+                            (factory as SingleInstanceHandlerFactory).HandlerInstance == handler
+                    );
+    });
         }
 
         public override void Unsubscribe(Type eventType, IEventHandlerFactory factory)
         {
-            throw new NotImplementedException();
+            GetOrCreateHandlerFactories(eventType).Locking(factories => factories.Remove(factory));
         }
 
         public override void UnsubscribeAll(Type eventType)
         {
-            throw new NotImplementedException();
+            GetOrCreateHandlerFactories(eventType).Locking(factories => factories.Clear());
         }
 
         protected override IEnumerable<EventTypeWithEventHandlerFactories> GetHandlerFactories(Type eventType)
         {
-            throw new NotImplementedException();
+            var handlerFactoryList = new List<EventTypeWithEventHandlerFactories>();
+
+            foreach (var handlerFactory in HandlerFactories.Where(hf => ShouldTriggerEventForHandler(eventType, hf.Key)))
+            {
+                handlerFactoryList.Add(new EventTypeWithEventHandlerFactories(handlerFactory.Key, handlerFactory.Value));
+            }
+
+            return handlerFactoryList.ToArray();
         }
     }
 }
