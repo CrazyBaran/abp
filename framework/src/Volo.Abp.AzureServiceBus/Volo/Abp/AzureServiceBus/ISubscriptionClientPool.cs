@@ -7,6 +7,6 @@ namespace Volo.Abp.AzureServiceBus
 {
     public interface ISubscriptionClientPool : IDisposable
     {
-        ISubscriptionClient Get(string topic, string connectionName = null);
+        ISubscriptionClient Get(string topic, string subscriptionName, string connectionName = null);
     }
 }

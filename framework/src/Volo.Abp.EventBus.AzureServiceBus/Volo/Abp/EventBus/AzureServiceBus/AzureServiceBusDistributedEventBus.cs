@@ -22,7 +22,6 @@ namespace Volo.Abp.EventBus.AzureServiceBus
         protected AbpAzureServiceBusEventBusOptions AbpAzureServiceBusEventBusOptions { get; }
         protected IAzureServiceBusSerializer Serializer { get; }
         protected ITopicClientPool TopicClientPool { get; }
-
         protected ConcurrentDictionary<Type, List<IEventHandlerFactory>> HandlerFactories { get; }
         protected ConcurrentDictionary<string, Type> EventTypes { get; }
 
@@ -30,6 +29,7 @@ namespace Volo.Abp.EventBus.AzureServiceBus
             IOptions<AbpAzureServiceBusEventBusOptions> options,
             IAzureServiceBusSerializer serializer,
             ITopicClientPool topicClientPool,
+            IServiceBusConnectionPool serviceBusConnectionPool,
             IServiceScopeFactory serviceScopeFactory,
             ICurrentTenant currentTenant)
             : base(serviceScopeFactory, currentTenant)

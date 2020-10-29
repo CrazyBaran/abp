@@ -9,30 +9,29 @@ using Volo.Abp.DependencyInjection;
 namespace Volo.Abp.AzureServiceBus
 {
     //https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-performance-improvements?tabs=net-standard-sdk#reusing-factories-and-clients
-    public class TopicClientPool : ITopicClientPool, ISingletonDependency
+    public class ServiceBusConnectionPool : IServiceBusConnectionPool, ISingletonDependency
     {
         protected AbpAzureServiceBusOptions Options { get; }
 
-        protected IServiceBusConnectionPool ServiceBusConnectionPool { get; }
-
-        protected ConcurrentDictionary<ValueTuple<string, string>, ITopicClient> Topics { get; set; }
-
         private bool _isDisposed;
 
-        public TopicClientPool(IOptions<AbpAzureServiceBusOptions> options)
+        protected ConcurrentDictionary<string, ServiceBusConnection> Connections { get; set; }
+        public ServiceBusConnectionPool(IOptions<AbpAzureServiceBusOptions> options)
         {
             Options = options.Value;
-            Topics = new ConcurrentDictionary<ValueTuple<string, string>, ITopicClient>();
+            Connections = new ConcurrentDictionary<string, ServiceBusConnection>();
         }
 
-        public ITopicClient Get(string topic, string connectionName = null)
+        public ServiceBusConnection Get(string connectionName = null)
         {
             connectionName = connectionName
-                             ?? AzureServiceBusConnections.DefaultConnectionName;
+                 ?? AzureServiceBusConnections.DefaultConnectionName;
 
-            return Topics.GetOrAdd(
-                (connectionName, topic),
-                () => new TopicClient(ServiceBusConnectionPool.Get(connectionName), topic, RetryPolicy.Default));
+            return Connections.GetOrAdd(connectionName,
+                () => new ServiceBusConnection(Options
+                .Connections
+                .GetOrDefault(connectionName))
+                );
         }
 
         public void Dispose()
@@ -44,7 +43,7 @@ namespace Volo.Abp.AzureServiceBus
 
             _isDisposed = true;
 
-            Topics.Clear();
+            Connections.Clear();
         }
     }
 }

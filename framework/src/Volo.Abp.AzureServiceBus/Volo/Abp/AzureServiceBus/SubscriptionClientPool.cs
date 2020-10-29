@@ -8,6 +8,7 @@ using Volo.Abp.DependencyInjection;
 
 namespace Volo.Abp.AzureServiceBus.Volo.Abp.AzureServiceBus
 {
+    //https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-performance-improvements?tabs=net-standard-sdk#reusing-factories-and-clients
     public class SubscriptionClientPool : ISubscriptionClientPool, ISingletonDependency
     {
         protected AbpAzureServiceBusOptions Options { get; }
@@ -21,14 +22,14 @@ namespace Volo.Abp.AzureServiceBus.Volo.Abp.AzureServiceBus
             Options = options.Value;
         }
 
-        public ISubscriptionClient Get(string topic, string connectionName = null)
+        public ISubscriptionClient Get(string topic, string subscriptionName, string connectionName = null)
         {
             connectionName = connectionName
                  ?? AzureServiceBusConnections.DefaultConnectionName;
 
             return Subscriptions.GetOrAdd(
                 new ValueTuple<string, string>(connectionName, topic),
-                () => new SubscriptionClient("", topic, "Default"));
+                () => new SubscriptionClient("", topic, subscriptionName));
         }
 
         public void Dispose()
