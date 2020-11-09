@@ -30,7 +30,7 @@ namespace Volo.Abp.AzureServiceBus
             return Connections.GetOrAdd(connectionName,
                 () => new ServiceBusConnection(Options
                 .Connections
-                .GetOrDefault(connectionName))
+                .GetOrDefault(connectionName).ConnectionString)
                 );
         }
 

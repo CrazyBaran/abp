@@ -355,9 +355,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.AspNetCore.Compone
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.Swashbuckle", "src\Volo.Abp.Swashbuckle\Volo.Abp.Swashbuckle.csproj", "{DD9519E0-5A68-48DC-A051-7BF2AC922F3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volo.Abp.EventBus.AzureServiceBus", "src\Volo.Abp.EventBus.AzureServiceBus\Volo.Abp.EventBus.AzureServiceBus.csproj", "{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.EventBus.AzureServiceBus", "src\Volo.Abp.EventBus.AzureServiceBus\Volo.Abp.EventBus.AzureServiceBus.csproj", "{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volo.Abp.AzureServiceBus", "src\Volo.Abp.AzureServiceBus\Volo.Abp.AzureServiceBus.csproj", "{6D6205D0-4B89-4CAD-A1DD-20B453858D19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.AzureServiceBus", "src\Volo.Abp.AzureServiceBus\Volo.Abp.AzureServiceBus.csproj", "{6D6205D0-4B89-4CAD-A1DD-20B453858D19}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.EventBus.AzureServiceBus.Tests", "test\Volo.Abp.EventBus.AzureServiceBus.Tests\Volo.Abp.EventBus.AzureServiceBus.Tests.csproj", "{C843BA9A-F1F9-41EB-98CD-A75A21FD4A58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1069,6 +1071,10 @@ Global
 		{6D6205D0-4B89-4CAD-A1DD-20B453858D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D6205D0-4B89-4CAD-A1DD-20B453858D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D6205D0-4B89-4CAD-A1DD-20B453858D19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C843BA9A-F1F9-41EB-98CD-A75A21FD4A58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C843BA9A-F1F9-41EB-98CD-A75A21FD4A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C843BA9A-F1F9-41EB-98CD-A75A21FD4A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C843BA9A-F1F9-41EB-98CD-A75A21FD4A58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1250,6 +1256,7 @@ Global
 		{DD9519E0-5A68-48DC-A051-7BF2AC922F3E} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
 		{B3B9870C-BF5A-4A9D-9A93-51457F1C37DB} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
 		{6D6205D0-4B89-4CAD-A1DD-20B453858D19} = {5DF0E140-0513-4D0D-BE2E-3D4D85CD70E6}
+		{C843BA9A-F1F9-41EB-98CD-A75A21FD4A58} = {447C8A77-E5F0-4538-8687-7383196D04EA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB97ECF4-9A84-433F-A80B-2A3285BDD1D5}

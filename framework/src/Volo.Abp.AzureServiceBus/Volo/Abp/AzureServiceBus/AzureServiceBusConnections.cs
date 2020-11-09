@@ -6,22 +6,22 @@ using JetBrains.Annotations;
 namespace Volo.Abp.AzureServiceBus
 {
     [Serializable]
-    public class AzureServiceBusConnections : Dictionary<string, string>
+    public class AzureServiceBusConnections : Dictionary<string, AzureServiceBusConnection>
     {
         public const string DefaultConnectionName = "Default";
 
         [NotNull]
-        public string Default
+        public AzureServiceBusConnection Default
         {
             get => this[DefaultConnectionName];
             set => this[DefaultConnectionName] = Check.NotNull(value, nameof(value));
         }
 
-        public string GetOrDefault(string connectionName)
+        public AzureServiceBusConnection GetOrDefault(string connectionName)
         {
-            if (TryGetValue(connectionName, out var connectionFactory))
+            if (TryGetValue(connectionName, out var connection))
             {
-                return connectionFactory;
+                return connection;
             }
 
             return Default;

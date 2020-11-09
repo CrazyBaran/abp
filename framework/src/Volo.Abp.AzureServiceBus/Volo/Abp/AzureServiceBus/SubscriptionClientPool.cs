@@ -6,14 +6,16 @@ using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Options;
 using Volo.Abp.DependencyInjection;
 
-namespace Volo.Abp.AzureServiceBus.Volo.Abp.AzureServiceBus
+namespace Volo.Abp.AzureServiceBus
 {
     //https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-performance-improvements?tabs=net-standard-sdk#reusing-factories-and-clients
     public class SubscriptionClientPool : ISubscriptionClientPool, ISingletonDependency
     {
         protected AbpAzureServiceBusOptions Options { get; }
 
-        protected ConcurrentDictionary<ValueTuple<string, string>, ISubscriptionClient> Subscriptions { get; set; }
+        protected IServiceBusConnectionPool ServiceBusConnectionPool { get; }
+
+        protected ConcurrentDictionary<ValueTuple<string, string, string>, ISubscriptionClient> Subscriptions { get; set; }
 
         private bool _isDisposed;
 
@@ -22,14 +24,15 @@ namespace Volo.Abp.AzureServiceBus.Volo.Abp.AzureServiceBus
             Options = options.Value;
         }
 
-        public ISubscriptionClient Get(string topic, string subscriptionName, string connectionName = null)
+        public ISubscriptionClient Get(string topicName, string subscriptionName, string connectionName = null)
         {
             connectionName = connectionName
                  ?? AzureServiceBusConnections.DefaultConnectionName;
 
             return Subscriptions.GetOrAdd(
-                new ValueTuple<string, string>(connectionName, topic),
-                () => new SubscriptionClient("", topic, subscriptionName));
+                new ValueTuple<string, string, string>(connectionName, topicName, subscriptionName),
+                () => new SubscriptionClient(ServiceBusConnectionPool.Get(connectionName), 
+                topicName, subscriptionName, ReceiveMode.PeekLock, null));
         }
 
         public void Dispose()

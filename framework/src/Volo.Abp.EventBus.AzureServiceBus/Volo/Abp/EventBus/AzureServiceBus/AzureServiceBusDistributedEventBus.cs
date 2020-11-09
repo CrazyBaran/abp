@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ namespace Volo.Abp.EventBus.AzureServiceBus
         protected AbpAzureServiceBusEventBusOptions AbpAzureServiceBusEventBusOptions { get; }
         protected IAzureServiceBusSerializer Serializer { get; }
         protected ITopicClientPool TopicClientPool { get; }
+        public ISubscriptionClientPool SubscriptionClientPool { get; }
         protected ConcurrentDictionary<Type, List<IEventHandlerFactory>> HandlerFactories { get; }
         protected ConcurrentDictionary<string, Type> EventTypes { get; }
 
@@ -29,7 +31,7 @@ namespace Volo.Abp.EventBus.AzureServiceBus
             IOptions<AbpAzureServiceBusEventBusOptions> options,
             IAzureServiceBusSerializer serializer,
             ITopicClientPool topicClientPool,
-            IServiceBusConnectionPool serviceBusConnectionPool,
+            ISubscriptionClientPool subscriptionClientPool,
             IServiceScopeFactory serviceScopeFactory,
             ICurrentTenant currentTenant)
             : base(serviceScopeFactory, currentTenant)
@@ -37,6 +39,7 @@ namespace Volo.Abp.EventBus.AzureServiceBus
             AbpAzureServiceBusEventBusOptions = options.Value;
             Serializer = serializer;
             TopicClientPool = topicClientPool;
+            SubscriptionClientPool = subscriptionClientPool;
         }
 
         public void Initialize()
@@ -66,7 +69,7 @@ namespace Volo.Abp.EventBus.AzureServiceBus
             var eventName = EventNameAttribute.GetNameOrDefault(eventType);
             var body = Serializer.Serialize(eventData);
 
-            var topicClient = TopicClientPool.Get(AbpAzureServiceBusEventBusOptions.ConnectionName, eventName);
+            var topicClient = await TopicClientPool.Get(eventName, AbpAzureServiceBusEventBusOptions.ConnectionName);
 
             await topicClient.SendAsync(new Message()
             {
@@ -92,7 +95,8 @@ namespace Volo.Abp.EventBus.AzureServiceBus
 
             if (handlerFactories.Count == 1) //TODO: Multi-threading!
             {
-                //Rebus.Subscribe(eventType);
+                var eventName = EventNameAttribute.GetNameOrDefault(eventType);
+                var subscriptionName = factory.GetHandler().EventHandler.GetType().Name;
             }
 
             return new EventHandlerFactoryUnregistrar(this, eventType, factory);
@@ -171,6 +175,24 @@ namespace Volo.Abp.EventBus.AzureServiceBus
             }
 
             return handlerFactoryList.ToArray();
+        }
+
+        private static bool ShouldTriggerEventForHandler(Type targetEventType, Type handlerEventType)
+        {
+            //Should trigger same type
+            if (handlerEventType == targetEventType)
+            {
+                return true;
+            }
+
+            //TODO: Support inheritance? But it does not support on subscription to RabbitMq!
+            //Should trigger for inherited types
+            if (handlerEventType.IsAssignableFrom(targetEventType))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
