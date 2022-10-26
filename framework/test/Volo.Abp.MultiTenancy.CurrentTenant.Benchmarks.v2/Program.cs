@@ -17,12 +17,13 @@ public class CurrentTenantBenchmark
         {
             AddExporter(MarkdownExporter.GitHub);
             AddDiagnoser(MemoryDiagnoser.Default);
-            AddJob(Job.Default.WithInvocationCount(409600));
+            AddJob(Job.Default.WithInvocationCount(4096000));
         }
     }
     
     private readonly CurrentTenantWithClosureAlloc CurrentTenantWithClosureAlloc;
     private readonly CurrentTenant CurrentTenantWithoutClosureAlloc;
+    private readonly CurrentTenantWithStruct CurrentTenantWithStruct;
     private readonly Guid tenantId1 = Guid.NewGuid();
     private readonly Guid tenantId2 = Guid.NewGuid(); 
     private readonly Guid tenantId3 = Guid.NewGuid(); 
@@ -37,6 +38,7 @@ public class CurrentTenantBenchmark
     {
         CurrentTenantWithClosureAlloc = new CurrentTenantWithClosureAlloc(AsyncLocalCurrentTenantAccessor.Instance);
         CurrentTenantWithoutClosureAlloc = new CurrentTenant(AsyncLocalCurrentTenantAccessor.Instance);
+        CurrentTenantWithStruct = new CurrentTenantWithStruct(AsyncLocalCurrentTenantAccessor.Instance);
     }
 
     [Benchmark(Baseline = true)]
@@ -52,6 +54,15 @@ public class CurrentTenantBenchmark
     public void WithoutClosureAllocation()
     {
         using (CurrentTenantWithoutClosureAlloc.Change(tenantId1))
+        {
+            
+        }
+    }
+
+    [Benchmark]
+    public void WithStructDisposeAction()
+    {
+        using (CurrentTenantWithStruct.Change(tenantId1))
         {
             
         }
